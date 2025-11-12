@@ -9,11 +9,22 @@ import { toast } from 'sonner';
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showMascot, setShowMascot] = useState(false);
+  const [userName, setUserName] = useState('');
   const [phone, setPhone] = useState('');
   const [smsCode, setSmsCode] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [employeePassword, setEmployeePassword] = useState('');
   const [loginError, setLoginError] = useState(false);
   const [trackingId, setTrackingId] = useState('');
   const [selectedTransport, setSelectedTransport] = useState<string | null>(null);
+  const [showCourierRegistration, setShowCourierRegistration] = useState(false);
+  const [courierData, setCourierData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    transportType: 'foot',
+    inn: ''
+  });
 
   const transportTypes = [
     { id: 'courier', name: 'Курьер', icon: 'User', subtitle: 'Документы, посылки до 5 тонн' },
@@ -30,11 +41,21 @@ const Index = () => {
     { region: 'Красные зоны', zones: ['Требуется подтверждение'], status: 'special' }
   ];
 
-  const handleLogin = () => {
-    if (phone.length < 10 || smsCode.length < 4) {
-      setLoginError(true);
-      setTimeout(() => setLoginError(false), 500);
-      return;
+  const handleLogin = (type: 'phone' | 'employee') => {
+    if (type === 'phone') {
+      if (phone.length < 10 || smsCode.length < 4) {
+        setLoginError(true);
+        setTimeout(() => setLoginError(false), 500);
+        return;
+      }
+      setUserName('Пользователь');
+    } else {
+      if (employeeId !== '001' || employeePassword !== 'Zarloxdk1224') {
+        setLoginError(true);
+        setTimeout(() => setLoginError(false), 500);
+        return;
+      }
+      setUserName('Илья Александрович');
     }
     
     setShowMascot(true);
@@ -95,7 +116,7 @@ const Index = () => {
                     className="bg-secondary border-gold/30 focus:border-gold text-foreground"
                   />
                 </div>
-                <Button onClick={handleLogin} className="w-full bg-gold hover:bg-gold-light text-navy font-semibold border-glow transition-all">
+                <Button onClick={() => handleLogin('phone')} className="w-full bg-gold hover:bg-gold-light text-navy font-semibold border-glow transition-all">
                   Войти
                 </Button>
               </TabsContent>
@@ -106,6 +127,8 @@ const Index = () => {
                   <Input
                     type="text"
                     placeholder="Введите ID"
+                    value={employeeId}
+                    onChange={(e) => setEmployeeId(e.target.value)}
                     className="bg-secondary border-gold/30 focus:border-gold text-foreground"
                   />
                 </div>
@@ -114,17 +137,23 @@ const Index = () => {
                   <Input
                     type="password"
                     placeholder="••••••••"
+                    value={employeePassword}
+                    onChange={(e) => setEmployeePassword(e.target.value)}
                     className="bg-secondary border-gold/30 focus:border-gold text-foreground"
                   />
                 </div>
-                <Button onClick={handleLogin} className="w-full bg-gold hover:bg-gold-light text-navy font-semibold border-glow transition-all">
+                <Button onClick={() => handleLogin('employee')} className="w-full bg-gold hover:bg-gold-light text-navy font-semibold border-glow transition-all">
                   Войти
                 </Button>
               </TabsContent>
             </Tabs>
 
             <div className="mt-6 pt-6 border-t border-gold/20">
-              <Button variant="outline" className="w-full border-gold/50 text-gold hover:bg-gold/10">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCourierRegistration(true)}
+                className="w-full border-gold/50 text-gold hover:bg-gold/10"
+              >
                 <Icon name="UserPlus" size={18} className="mr-2" />
                 Курьеринг - Регистрация курьера
               </Button>
@@ -137,8 +166,129 @@ const Index = () => {
             <Card className="max-w-md bg-card/95 border-gold border-2 animate-glow-pulse">
               <CardContent className="p-8 text-center">
                 <div className="text-6xl mb-4 animate-cyber-flicker">👩‍💼</div>
-                <h2 className="text-2xl font-bold text-gold text-glow mb-2">Добро пожаловать!</h2>
+                <h2 className="text-2xl font-bold text-gold text-glow mb-2">
+                  {userName === 'Илья Александрович' ? `Добро пожаловать, ${userName}!` : 'Добро пожаловать!'}
+                </h2>
                 <p className="text-foreground">Рада приветствовать вас в системе H&C Logistics</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {showCourierRegistration && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <Card className="w-full max-w-lg bg-card/95 border-gold border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gold">Регистрация курьера</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setShowCourierRegistration(false)}
+                    className="text-gold hover:bg-gold/10"
+                  >
+                    <Icon name="X" size={24} />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Имя</label>
+                      <Input
+                        placeholder="Иван"
+                        value={courierData.firstName}
+                        onChange={(e) => setCourierData({...courierData, firstName: e.target.value})}
+                        className="bg-secondary border-gold/30 focus:border-gold text-foreground"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Фамилия</label>
+                      <Input
+                        placeholder="Иванов"
+                        value={courierData.lastName}
+                        onChange={(e) => setCourierData({...courierData, lastName: e.target.value})}
+                        className="bg-secondary border-gold/30 focus:border-gold text-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Телефон</label>
+                    <Input
+                      type="tel"
+                      placeholder="+7 (999) 123-45-67"
+                      value={courierData.phone}
+                      onChange={(e) => setCourierData({...courierData, phone: e.target.value})}
+                      className="bg-secondary border-gold/30 focus:border-gold text-foreground"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">ИНН (для самозанятых)</label>
+                    <Input
+                      placeholder="123456789012"
+                      value={courierData.inn}
+                      onChange={(e) => setCourierData({...courierData, inn: e.target.value})}
+                      className="bg-secondary border-gold/30 focus:border-gold text-foreground"
+                    />
+                    <p className="text-xs text-muted-foreground">Автоматическая регистрация как самозанятый</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Тип доставки</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setCourierData({...courierData, transportType: 'foot'})}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          courierData.transportType === 'foot'
+                            ? 'bg-gold/20 border-gold border-glow'
+                            : 'bg-secondary/50 border-gold/30 hover:border-gold/50'
+                        }`}
+                      >
+                        <Icon name="User" size={24} className="text-gold mx-auto mb-2" />
+                        <p className="text-sm font-semibold text-foreground">Пеший курьер</p>
+                      </button>
+                      <button
+                        onClick={() => setCourierData({...courierData, transportType: 'car'})}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          courierData.transportType === 'car'
+                            ? 'bg-gold/20 border-gold border-glow'
+                            : 'bg-secondary/50 border-gold/30 hover:border-gold/50'
+                        }`}
+                      >
+                        <Icon name="Car" size={24} className="text-gold mx-auto mb-2" />
+                        <p className="text-sm font-semibold text-foreground">Личный авто</p>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-secondary/50 rounded-lg p-4 border border-gold/20">
+                    <div className="flex items-start space-x-3">
+                      <Icon name="Info" size={20} className="text-gold mt-0.5" />
+                      <div className="text-sm text-foreground">
+                        <p className="font-semibold mb-1">Условия работы:</p>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          <li>• Комиссия: 18-23% от дохода</li>
+                          <li>• Стартовый рейтинг: 3 звезды</li>
+                          <li>• +0.3% рейтинга за каждый положительный отзыв</li>
+                          <li>• Автоматическое назначение на линию</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={() => {
+                      toast.success('Регистрация успешна! Вы автоматически назначены на линию');
+                      setShowCourierRegistration(false);
+                    }}
+                    className="w-full bg-gold hover:bg-gold-light text-navy font-semibold"
+                  >
+                    <Icon name="CheckCircle" size={18} className="mr-2" />
+                    Зарегистрироваться
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -157,7 +307,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gold">H&C Logistics</h1>
-              <p className="text-xs text-muted-foreground">Панель управления</p>
+              <p className="text-xs text-muted-foreground">{userName === 'Илья Александрович' ? userName : 'Панель управления'}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="border-gold/50 text-gold hover:bg-gold/10">
